@@ -1,0 +1,4 @@
+Je pensais a opengl j'en ai parlait avec l'appel a un ami est c'est le mieux pour
+du multiplateforme sans prise de tete sinon ya vulkan mais ca casse la tete c'est
+pas suporter partout ya des bail de driver qui sont pas compatible etc alors que
+opengl c'est tout good des le debut

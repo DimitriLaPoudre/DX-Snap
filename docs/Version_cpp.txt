@@ -1,0 +1,2 @@
+ca jsp l'appele a un ami m'a dit le plus recent c'est le mieux pour que le
+code soit toujours plus simple a maintenir dcp ce serait c++20 ou c++23 askip

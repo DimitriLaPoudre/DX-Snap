@@ -1,0 +1,3 @@
+un package .deb pour linux et l'equivalent pour le splateforme souhaiter
+ou on fout tout le necessaire et ca dl tout ce qu'il faut et ca installe
+nos truc qu'on a fait 
