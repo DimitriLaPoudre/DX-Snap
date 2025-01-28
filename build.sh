@@ -18,7 +18,7 @@ elif [ "$1" = "fclean" ]; then
     rm -rf $(find src -name '*.o')
     rm -rf dx-snap
 else
-    CFLAGS="-Wall -O2"
+    CFLAGS="-Wall -Wextra -Werror -std=c++20"
     for cpp_file in $(find src -name '*.cpp'); do
         g++ $CFLAGS -c "$cpp_file" -o "${cpp_file%.cpp}.o"
     done
