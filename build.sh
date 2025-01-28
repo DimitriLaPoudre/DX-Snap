@@ -1,33 +1,27 @@
-#!/bin/bash
+#!/bin/sh
 
-# Vérifie si CMake est installé
-command -v cmake >/dev/null 2>&1 || { echo "CMake est requis mais non installé. Abandon."; exit 1; }
-
-# Créer un dossier de build si nécessaire
-mkdir -p build
-cd build
-
-# Exécuter CMake pour générer les fichiers de configuration
-echo "Exécution de CMake..."
-cmake ..
-
-# Compiler le projet
-echo "Compilation du projet..."
-make
-
-# Installer le projet (optionnel, juste pour tester avant le packaging)
-echo "Installation du projet..."
-make install
-
-# Créer le paquet .deb
-echo "Création du paquet .deb..."
-make package
-
-#Récuperer le paquet .deb
-echo "Récuperation du paquet .deb..."
-mv *.deb ../
-
-# Retourner dans le dossier racine et supprimer le dossier de build
-echo "Nettoyage..."
-cd ..
-rm -rf build
+if [ "$1" = "build" ]; then
+    dpkg-buildpackage -us -uc
+    rm -rf debian/dx-snap
+    rm -rf debian/.debhelper/
+    rm -rf debian/files
+    rm -rf debian/*.substvars
+    rm -rf debian/debhelper-build-stamp
+    rm -rf ../dx-snap_0.0-1.dsc
+    rm -rf ../dx-snap_0.0-1.tar.gz
+    rm -rf ../dx-snap_0.0-1_amd64.changes
+    rm -rf ../dx-snap_0.0-1_amd64.buildinfo
+    mv ../dx-snap_0.0-1_all.deb ./dx-snap.deb
+elif [ "$1" = "clean" ]; then
+    rm -rf $(find src -name '*.o')
+elif [ "$1" = "fclean" ]; then
+    rm -rf $(find src -name '*.o')
+    rm -rf dx-snap
+else
+    CFLAGS="-Wall -O2"
+    for cpp_file in $(find src -name '*.cpp'); do
+        g++ $CFLAGS -c "$cpp_file" -o "${cpp_file%.cpp}.o"
+    done
+    g++ $CFLAGS $(find src -name '*.o') -o dx-snap
+    ./build.sh clean
+fi

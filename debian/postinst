@@ -1,0 +1,18 @@
+#!/bin/sh
+set -e
+
+cd /var/tmp/dx-snap/
+make
+
+mkdir -p /opt/dx-snap/bin
+mv /var/tmp/dx-snap/src/dx-snap /opt/dx-snap/bin/
+mkdir -p /opt/dx-snap/assets
+mv /var/tmp/dx-snap/assets/* /opt/dx-snap/assets/
+mkdir -p /opt/dx-snap/docs
+mv /var/tmp/dx-snap/docs/* /opt/dx-snap/docs/
+mkdir -p /opt/dx-snap/include
+mv /var/tmp/dx-snap/include/* /opt/dx-snap/include/
+
+rm -rf /var/tmp/dx-snap
+
+exit 0

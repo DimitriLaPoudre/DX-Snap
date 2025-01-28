@@ -1,0 +1,6 @@
+dx-snap (0.0-1) unstable; urgency=medium
+
+  * Initial release.
+  * Added initial source files and documentation.
+  * Set up project structure with src, docs, include, and tests directories.
+ --  Dimitri <dimitri@example.com>  Tue, 28 Jan 2025 15:37:00 +0000

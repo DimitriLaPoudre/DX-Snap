@@ -1,0 +1,25 @@
+#!/usr/bin/make -f
+
+PACKAGE = dx-snap
+VERSION = 0.0-1
+DESTDIR = $(CURDIR)/debian/$(PACKAGE)
+
+%:
+	dh $@
+
+override_dh_auto_build:
+	true
+override_dh_auto_install:
+	mkdir -p $(DESTDIR)/var/tmp/$(PACKAGE)
+	cp -r src $(DESTDIR)/var/tmp/$(PACKAGE)/
+	cp -r assets $(DESTDIR)/var/tmp/$(PACKAGE)/
+	cp -r include $(DESTDIR)/var/tmp/$(PACKAGE)/
+
+override_dh_usrlocal:
+	true
+
+clean:
+	rm -rf debian/.debhelper/
+	rm -rf debian/files
+	rm -rf debian/*.substvars
+	rm -rf debian/debhelper-build-stamp	
