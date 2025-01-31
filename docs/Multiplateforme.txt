@@ -1,0 +1,2 @@
+si on utilise que std et opengl et qu'on fait gaffe au path employé (diff de
+format entre windows et linux) le code sera 100% multiplateforme
