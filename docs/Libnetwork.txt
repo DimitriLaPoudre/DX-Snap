@@ -1,0 +1,3 @@
+ya boost qui est genre la lib cpp mais en avance c'est des crack qui invente
+toute les fonction classique du cpp donc soit leur lib pour le reseau soit une
+autre lib network multiplateforme

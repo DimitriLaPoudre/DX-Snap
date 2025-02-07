@@ -1,0 +1,3 @@
+Alors pour ca, ca pourrait etre insane de scrapp snap zone et de recup les
+variante directement dessus avec curl ou sinon ya boost.beast qui est un curl
+fait par boost
