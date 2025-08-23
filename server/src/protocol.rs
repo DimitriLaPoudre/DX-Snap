@@ -1,4 +1,4 @@
-use crate::Client;
+use crate::client::Client;
 
 use async_trait::async_trait;
 use std::io::{Error, ErrorKind};
@@ -6,7 +6,7 @@ use tokio::io::{AsyncReadExt, AsyncWriteExt, Result};
 
 #[derive(Copy, Clone)]
 pub enum ClientState {
-    Unknown,
+    Handshake,
     Connected,
 }
 
@@ -22,7 +22,7 @@ impl ClientState {
     #[inline(always)]
     fn behavior(&self) -> &'static dyn CommandBehavior {
         match self {
-            ClientState::Unknown => &UNKNOWN_BEHAVIOR,
+            ClientState::Handshake => &HANDSHAKE_BEHAVIOR,
             ClientState::Connected => &CONNECTED_BEHAVIOR,
         }
     }
@@ -34,11 +34,11 @@ trait CommandBehavior {
     async fn received(&self, client: &mut Client) -> Result<()>;
 }
 
-struct UnknownBehavior;
-static UNKNOWN_BEHAVIOR: UnknownBehavior = UnknownBehavior;
+struct HandshakeBehavior;
+static HANDSHAKE_BEHAVIOR: HandshakeBehavior = HandshakeBehavior;
 
 #[async_trait]
-impl CommandBehavior for UnknownBehavior {
+impl CommandBehavior for HandshakeBehavior {
     async fn send(&self, client: &mut Client) -> Result<()> {
         Ok(())
     }
