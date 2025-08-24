@@ -16,7 +16,7 @@ impl Client {
         Client {
             reader,
             writer,
-            state: ClientState::Handshake,
+            state: ClientState::Login,
         }
     }
 

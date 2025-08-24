@@ -1,5 +1,9 @@
 mod client;
 mod protocol;
+mod states {
+    pub mod homepage;
+    pub mod login;
+}
 
 use crate::client::Client;
 
