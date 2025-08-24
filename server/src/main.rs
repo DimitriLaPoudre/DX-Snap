@@ -68,24 +68,11 @@ impl Server {
             }
         });
     }
-
-    // async fn add_user(&self, username: Username, passwd: Passwd) -> Result<()> {
-    //     let mut write_guard = self.clients.write().await;
-    //     if write_guard.iter().any(|(key, _)| *key == username) {
-    //         Err(Error::new(
-    //             ErrorKind::ConnectionAborted,
-    //             "Username already exist",
-    //         ))
-    //     } else {
-    //         write_guard.push((username, passwd));
-    //         Ok(())
-    //     }
-    // }
 }
 
 #[tokio::main]
 async fn main() {
-    const ADDR: &str = "127.0.0.1:13216";
+    const ADDR: &str = "0.0.0.0:13216";
     let mut server = Server::new(ADDR).await;
 
     loop {
