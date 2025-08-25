@@ -18,9 +18,9 @@ class _HomePageState extends State<HomePage> {
     connectToServer();
   }
 
-  void connectToServer() {
+  void connectToServer() async {
     try {
-      _tcpClient.connect('127.0.0.1', 8080);
+      await _tcpClient.connect('127.0.0.1', 8080);
     } catch (e) {
       debugPrint("Error connecting to server: $e");
     }
