@@ -1,10 +1,12 @@
 pub use crate::client::Client;
+
+use crate::prelude::*;
 use crate::states::homepage::*;
 use crate::states::login::*;
 
 pub use async_trait::async_trait;
 pub use serde::{Deserialize, Serialize};
-pub use tokio::io::{AsyncReadExt, AsyncWriteExt, Result};
+pub use tokio::io::{AsyncReadExt, AsyncWriteExt};
 
 #[derive(Deserialize, Serialize)]
 pub struct Message {
@@ -17,6 +19,7 @@ pub struct Message {
 #[serde(tag = "type")]
 pub enum MessagePayload {
     Login(LoginPayload),
+    Homepage(HomepagePayload),
 }
 
 #[derive(Copy, Clone)]

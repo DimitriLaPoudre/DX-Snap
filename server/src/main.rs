@@ -1,4 +1,5 @@
 mod client;
+mod prelude;
 mod protocol;
 mod states {
     pub mod homepage;
@@ -6,23 +7,22 @@ mod states {
 }
 
 use crate::client::Client;
+use crate::prelude::*;
 
-use chrono::{DateTime, Utc};
+use sqlx::{Pool, Postgres};
 use std::fs::{File, OpenOptions};
 use std::io::{BufWriter, Write};
-use std::io::{Error, ErrorKind};
 use std::net::SocketAddr;
-use std::sync::Arc;
-use tokio::io::Result;
 use tokio::net::{TcpListener, TcpStream};
 use tokio::signal;
 use tokio::sync::mpsc::{self, Receiver, Sender};
-use tokio::sync::{Mutex, Notify, RwLock};
+use tokio::sync::{Notify, RwLock};
 use tokio::task::JoinSet;
 
 struct Server {
     notify: Arc<Notify>,
     logs: BufWriter<File>,
+    sql_pool: Arc<Pool<Postgres>>,
     listener: TcpListener,
     join_set: JoinSet<Result<()>>,
     clients: Arc<RwLock<Vec<String>>>,
@@ -41,16 +41,25 @@ impl Server {
         let logs = BufWriter::new(file);
         let listener = TcpListener::bind(addr).await.unwrap();
         let mut join_set = JoinSet::new();
+        let clients: Arc<RwLock<Vec<String>>> = Arc::new(RwLock::new(vec![]));
+        let sql_pool = Arc::new(
+            sqlx::postgres::PgPoolOptions::new()
+                .max_connections(100)
+                .connect("postgres://dx_snap_server:dx_snap_on_top@localhost/dx_snap_db")
+                .await
+                .unwrap(),
+        );
+
         let tmp_notify = Arc::clone(&notify);
         join_set.spawn(async move {
             tmp_notify.notified().await;
             Ok(())
         });
-        let clients: Arc<RwLock<Vec<String>>> = Arc::new(RwLock::new(vec![]));
 
         Self {
             notify,
             logs,
+            sql_pool,
             listener,
             join_set,
             clients,
@@ -59,7 +68,8 @@ impl Server {
 
     async fn handle_connexion(&mut self, (stream, addr): (TcpStream, SocketAddr)) {
         let notify = Arc::clone(&self.notify);
-        let mut client = Client::create(stream).await;
+        let sql_pool = Arc::clone(&self.sql_pool);
+        let mut client = Client::create(stream, sql_pool).await;
         self.join_set.spawn(async move {
             tokio::select! {
                 _ = notify.notified() => {
