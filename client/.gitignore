@@ -1,0 +1,45 @@
+# Flutter/Dart/Pub stuff
+.dart_tool/
+.packages
+.pub-cache/
+pubspec.lock
+
+# Build outputs
+build/
+android/app/build/
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/Flutter/App.framework
+ios/Flutter/engine/
+
+# Platform-specific
+*.apk
+*.ipa
+*.app.dSYM.zip
+*.app.dSYM
+
+# IDE configs
+.idea/
+.vscode/
+*.iml
+
+# MacOS cruft
+.DS_Store
+*.swp
+
+# Windows cruft
+Thumbs.db
+desktop.ini
+
+# Web
+web/.dart_tool/
+web/.firebase/
+
+# Linux/Windows/Mac builds
+linux/build/
+macos/build/
+windows/build/
+
+**/generated_plugin_registrant.*
