@@ -6,15 +6,21 @@ edition = "2024"
 [dependencies]
 #async-trait is for the protocol: dyn cant call async func natively
 async-trait = "0.1.88"
-chrono = "0.4.41"
+#find by urself dumbass
+chrono = "0.4"
 #get home path
-dirs = "6.0.0"
+dirs = "6.0"
 #async environment
 tokio = { version = "1.46", features = ["full"] }
-#serde is the serializer for json and msgpack format
+#serde is the serializer for json format
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 #postgres manager
 sqlx = { version = "0.7", features = ["postgres", "runtime-tokio-rustls"] }
+#find by urself dumbass
 uuid = { version = "1.18", features = ["serde", "v4"] }
+#result wrapper
 anyhow = "1.0.99"
+#websocket
+tokio-tungstenite = "0.27"
+futures-util = "0.3.31"

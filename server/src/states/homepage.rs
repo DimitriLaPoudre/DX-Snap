@@ -4,7 +4,8 @@ use crate::protocol::*;
 pub struct HomepageBehavior;
 
 #[derive(Deserialize, Serialize)]
-pub enum HomepagePayload {
+#[serde(tag = "action")]
+pub enum HomepageActions {
     Play {},
     Collection {},
     Settings {},
@@ -17,8 +18,8 @@ impl CommandBehavior for HomepageBehavior {
         Ok(())
     }
 
-    async fn received(&self, client: &mut Client, msg: Message) -> Result<()> {
-        if let MessagePayload::Homepage(payload) = msg.payload {
+    async fn received(&self, client: &mut Client, msg: Request) -> Result<()> {
+        if let RequestTypes::Homepage(action) = msg.data {
         } else {
         }
 

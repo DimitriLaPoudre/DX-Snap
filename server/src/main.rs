@@ -25,7 +25,6 @@ struct Server {
     sql_pool: Arc<Pool<Postgres>>,
     listener: TcpListener,
     join_set: JoinSet<Result<()>>,
-    clients: Arc<RwLock<Vec<String>>>,
 }
 
 impl Server {
@@ -41,7 +40,6 @@ impl Server {
         let logs = BufWriter::new(file);
         let listener = TcpListener::bind(addr).await.unwrap();
         let mut join_set = JoinSet::new();
-        let clients: Arc<RwLock<Vec<String>>> = Arc::new(RwLock::new(vec![]));
         let sql_pool = Arc::new(
             sqlx::postgres::PgPoolOptions::new()
                 .max_connections(100)
@@ -62,25 +60,31 @@ impl Server {
             sql_pool,
             listener,
             join_set,
-            clients,
         }
     }
 
-    async fn handle_connexion(&mut self, (stream, addr): (TcpStream, SocketAddr)) {
+    async fn handle_connexion(&mut self, (stream, _addr): (TcpStream, SocketAddr)) {
         let notify = Arc::clone(&self.notify);
         let sql_pool = Arc::clone(&self.sql_pool);
-        let mut client = Client::create(stream, sql_pool).await;
-        self.join_set.spawn(async move {
-            tokio::select! {
-                _ = notify.notified() => {
-                    eprintln!("{{Unknown}}: shell() stopped by notify.");
-                    Ok(())
-                }
-                ret = client.shell() => {
-                    ret
-                }
+        match Client::create(stream, sql_pool).await {
+            Ok(mut client) => {
+                self.join_set.spawn(async move {
+                    tokio::select! {
+                        _ = notify.notified() => {
+                            eprintln!("{{Unknown}}: shell() stopped by notify.");
+                            Ok(())
+                        }
+                        ret = client.shell() => {
+                            ret
+                        }
+                    }
+                });
             }
-        });
+            Err(e) => {
+                #[cfg(debug_assertions)]
+                println!("{{Unknown}}: client creation failed: {}", e);
+            }
+        }
     }
 }
 

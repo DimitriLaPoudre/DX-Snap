@@ -1,32 +1,47 @@
 use crate::prelude::*;
 use crate::protocol::ClientState;
 
+use futures_util::stream::{SplitSink, SplitStream, StreamExt};
 use sqlx::{Pool, Postgres};
 use tokio::net::TcpStream;
-use tokio::net::tcp::{OwnedReadHalf, OwnedWriteHalf};
+use tokio_tungstenite::{WebSocketStream, accept_async, tungstenite::protocol::Message};
 
 pub struct Client {
-    pub reader: OwnedReadHalf,
-    pub writer: OwnedWriteHalf,
+    pub writer: SplitSink<WebSocketStream<TcpStream>, Message>,
+    pub reader: SplitStream<WebSocketStream<TcpStream>>,
     pub sql_pool: Arc<Pool<Postgres>>,
     pub state: ClientState,
 }
 
 impl Client {
-    pub async fn create(stream: TcpStream, sql_pool: Arc<Pool<Postgres>>) -> Self {
-        let (reader, writer) = stream.into_split();
-        Client {
-            reader,
+    pub async fn create(stream: TcpStream, sql_pool: Arc<Pool<Postgres>>) -> Result<Self> {
+        #[cfg(debug_assertions)]
+        println!(
+            "New client create with addr: {}.",
+            match stream.peer_addr() {
+                Ok(addr) => {
+                    addr.ip().to_string()
+                }
+                Err(_) => {
+                    "Ip inaccessible".into()
+                }
+            }
+        );
+
+        let stream = accept_async(stream).await?;
+
+        let (writer, reader) = stream.split();
+
+        Ok(Client {
             writer,
+            reader,
             sql_pool,
             state: ClientState::Login,
-        }
+        })
     }
 
     pub async fn shell(&mut self) -> Result<()> {
         loop {
-            self.reader.readable().await?;
-
             let state = self.state;
             state.received(self).await?;
         }

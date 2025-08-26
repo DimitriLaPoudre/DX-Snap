@@ -5,21 +5,23 @@ use crate::states::homepage::*;
 use crate::states::login::*;
 
 pub use async_trait::async_trait;
+pub use futures_util::sink::SinkExt;
+pub use futures_util::stream::StreamExt;
 pub use serde::{Deserialize, Serialize};
-pub use tokio::io::{AsyncReadExt, AsyncWriteExt};
+pub use tokio_tungstenite::tungstenite::protocol::Message;
 
 #[derive(Deserialize, Serialize)]
-pub struct Message {
+pub struct Request {
     pub seq: u32,
     #[serde(flatten)]
-    pub payload: MessagePayload,
+    pub data: RequestTypes,
 }
 
 #[derive(Deserialize, Serialize)]
 #[serde(tag = "type")]
-pub enum MessagePayload {
-    Login(LoginPayload),
-    Homepage(HomepagePayload),
+pub enum RequestTypes {
+    Login(LoginActions),
+    Homepage(HomepageActions),
 }
 
 #[derive(Copy, Clone)]
@@ -34,17 +36,31 @@ impl ClientState {
     }
 
     pub async fn received(&self, client: &mut Client) -> Result<()> {
-        let mut buf_header = [0; 4];
+        #[cfg(debug_assertions)]
+        println!("new msg received");
 
-        client.reader.read_exact(&mut buf_header).await?;
-        let msg_length = u32::from_be_bytes(buf_header) as usize;
-
-        let mut msg = vec![0; msg_length];
-        client.reader.read_exact(&mut msg).await?;
-
-        let msg: Message = serde_json::from_slice(&msg)?;
-
-        self.behavior().received(client, msg).await
+        match client
+            .reader
+            .next()
+            .await
+            .ok_or(anyhow!("connection lost"))?
+        {
+            Ok(frame) => match frame {
+                Message::Text(txt) => {
+                    let msg: Request = serde_json::from_str(&txt.to_string())?;
+                    self.behavior().received(client, msg).await
+                }
+                Message::Binary(bin) => Ok(()),
+                Message::Close(cf) => {
+                    client.writer.send(Message::Close(cf)).await.ok();
+                    Err(anyhow!("connection closed"))
+                }
+                _ => Ok(()),
+            },
+            Err(e) => {
+                return Err(anyhow!(e));
+            }
+        }
     }
 
     #[inline(always)]
@@ -59,7 +75,7 @@ impl ClientState {
 #[async_trait]
 pub trait CommandBehavior {
     async fn send(&self, client: &mut Client) -> Result<()>;
-    async fn received(&self, client: &mut Client, msg: Message) -> Result<()>;
+    async fn received(&self, client: &mut Client, msg: Request) -> Result<()>;
 }
 
 static LOGIN_BEHAVIOR: LoginBehavior = LoginBehavior;

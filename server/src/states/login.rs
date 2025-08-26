@@ -6,7 +6,8 @@ use anyhow::Ok;
 use uuid::Uuid;
 
 #[derive(Deserialize, Serialize)]
-pub enum LoginPayload {
+#[serde(tag = "action")]
+pub enum LoginActions {
     Create { username: String, password: String },
     Connect { username: String, password: String },
     Token { token: Uuid },
@@ -20,16 +21,16 @@ impl CommandBehavior for LoginBehavior {
         Ok(())
     }
 
-    async fn received(&self, client: &mut Client, msg: Message) -> Result<()> {
-        if let MessagePayload::Login(payload) = msg.payload {
-            match payload {
-                LoginPayload::Create { username, password } => {
+    async fn received(&self, client: &mut Client, msg: Request) -> Result<()> {
+        if let RequestTypes::Login(action) = msg.data {
+            match action {
+                LoginActions::Create { username, password } => {
                     create_user(client, username, password).await?
                 }
-                LoginPayload::Connect { username, password } => {
+                LoginActions::Connect { username, password } => {
                     connect_user(client, username, password).await?
                 }
-                LoginPayload::Token { token } => connect_token(client, token).await?,
+                LoginActions::Token { token } => connect_token(client, token).await?,
             }
         } else {
         }
