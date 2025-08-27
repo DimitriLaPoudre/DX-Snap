@@ -15,15 +15,14 @@ pub struct Client {
 
 impl Client {
     pub async fn create(stream: TcpStream, sql_pool: Arc<Pool<Postgres>>) -> Result<Self> {
-        #[cfg(debug_assertions)]
-        println!(
-            "New client create with addr: {}.",
+        log::info!(
+            "New client created from: {}.",
             match stream.peer_addr() {
                 Ok(addr) => {
                     addr.ip().to_string()
                 }
                 Err(_) => {
-                    "Ip inaccessible".into()
+                    "<Unknown-IP>".into()
                 }
             }
         );
@@ -31,6 +30,8 @@ impl Client {
         let stream = accept_async(stream).await?;
 
         let (writer, reader) = stream.split();
+
+        log::error!("test");
 
         Ok(Client {
             writer,

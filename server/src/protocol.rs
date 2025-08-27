@@ -36,8 +36,7 @@ impl ClientState {
     }
 
     pub async fn received(&self, client: &mut Client) -> Result<()> {
-        #[cfg(debug_assertions)]
-        println!("new msg received");
+        log::debug!("new request received");
 
         match client
             .reader

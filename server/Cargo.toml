@@ -8,6 +8,9 @@ edition = "2024"
 async-trait = "0.1.88"
 #find by urself dumbass
 chrono = "0.4"
+#logs
+fern = "0.6"
+log = "0.4"
 #get home path
 dirs = "6.0"
 #async environment
