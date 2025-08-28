@@ -11,6 +11,7 @@ pub struct Client {
     pub reader: SplitStream<WebSocketStream<TcpStream>>,
     pub sql_pool: Arc<Pool<Postgres>>,
     pub state: ClientState,
+    pub id: i64,
 }
 
 impl Client {
@@ -38,6 +39,7 @@ impl Client {
             reader,
             sql_pool,
             state: ClientState::Login,
+            id: 0,
         })
     }
 
