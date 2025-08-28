@@ -11,19 +11,19 @@ pub struct Client {
     pub reader: SplitStream<WebSocketStream<TcpStream>>,
     pub sql_pool: Arc<Pool<Postgres>>,
     pub state: ClientState,
+    pub id: i64,
 }
 
 impl Client {
     pub async fn create(stream: TcpStream, sql_pool: Arc<Pool<Postgres>>) -> Result<Self> {
-        #[cfg(debug_assertions)]
-        println!(
-            "New client create with addr: {}.",
+        log::info!(
+            "New client created from: {}.",
             match stream.peer_addr() {
                 Ok(addr) => {
                     addr.ip().to_string()
                 }
                 Err(_) => {
-                    "Ip inaccessible".into()
+                    "<Unknown-IP>".into()
                 }
             }
         );
@@ -32,11 +32,14 @@ impl Client {
 
         let (writer, reader) = stream.split();
 
+        log::error!("test");
+
         Ok(Client {
             writer,
             reader,
             sql_pool,
             state: ClientState::Login,
+            id: 0,
         })
     }
 
