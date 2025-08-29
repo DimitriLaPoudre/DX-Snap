@@ -36,8 +36,6 @@ impl ClientState {
     }
 
     pub async fn received(&self, client: &mut Client) -> Result<()> {
-        log::debug!("new request received");
-
         match client
             .reader
             .next()
@@ -51,14 +49,12 @@ impl ClientState {
                 }
                 Message::Binary(bin) => Ok(()),
                 Message::Close(cf) => {
-                    client.writer.send(Message::Close(cf)).await.ok();
+                    client.writer.send(Message::Close(cf)).await?;
                     Err(anyhow!("connection closed"))
                 }
                 _ => Ok(()),
             },
-            Err(e) => {
-                return Err(anyhow!(e));
-            }
+            Err(e) => Err(anyhow!(e)),
         }
     }
 

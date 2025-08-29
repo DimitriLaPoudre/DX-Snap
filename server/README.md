@@ -16,6 +16,7 @@
 sudo apt update
 sudo apt install postgresql postgresql-contrib
 
+#for setting up the db
 cargo install sqlx-cli --no-default-features --features postgres
 sqlx database create
 sqlx migrate run
