@@ -1,9 +1,22 @@
-FROM rust:latest
+FROM rust:latest as builder
 
-COPY . /app
+RUN apt-get update && \
+    apt-get install -y postgresql postgresql-contrib && \
+    rm -rf /var/lib/apt/lists/*
 
-WORKDIR /app
+WORKDIR /usr/src/app
 
-RUN apt-get update && apt-get install -y --no-install-recommends postgresql postgresql-contrib && cargo install sqlx-cli --no-default-features --features postgres && /etc/init.d/postgresql start && psql -c "CREATE USER dx_snap_server WITH PASSWORD 'dx_snap_on_top'; CREATE DATABASE dx_snap_db OWNER dx_snap_server;" && sqlx migrate run && cargo build
+COPY Cargo.toml Cargo.lock .env ./
+COPY src ./src
+COPY migrations ./migrations
 
-CMD ["cargo", "run"]
+RUN service postgresql start && \
+    su - postgres -c "psql -c \"CREATE USER dx_snap_server WITH PASSWORD 'dx_snap_on_top';\"" && \
+    su - postgres -c "psql -c \"CREATE DATABASE dx_snap_db OWNER dx_snap_server;\"" && \
+	cargo install sqlx-cli --no-default-features --features postgres && \
+    sqlx migrate run && \
+	cargo build
+
+EXPOSE 13216
+
+CMD service postgresql start && cargo run
