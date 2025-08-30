@@ -10,20 +10,6 @@ pub use futures_util::stream::StreamExt;
 pub use serde::{Deserialize, Serialize};
 pub use tokio_tungstenite::tungstenite::protocol::Message;
 
-#[derive(Deserialize, Serialize)]
-pub struct Request {
-    pub seq: u32,
-    #[serde(flatten)]
-    pub data: RequestTypes,
-}
-
-#[derive(Deserialize, Serialize)]
-#[serde(tag = "type")]
-pub enum RequestTypes {
-    Login(LoginActions),
-    Homepage(HomepageActions),
-}
-
 #[derive(Copy, Clone)]
 pub enum ClientState {
     Login,
@@ -36,8 +22,6 @@ impl ClientState {
     }
 
     pub async fn received(&self, client: &mut Client) -> Result<()> {
-        log::debug!("new request received");
-
         match client
             .reader
             .next()
@@ -45,20 +29,14 @@ impl ClientState {
             .ok_or(anyhow!("connection lost"))?
         {
             Ok(frame) => match frame {
-                Message::Text(txt) => {
-                    let msg: Request = serde_json::from_str(&txt.to_string())?;
-                    self.behavior().received(client, msg).await
-                }
-                Message::Binary(bin) => Ok(()),
+                Message::Text(txt) => self.behavior().received(client, txt.to_string()).await,
                 Message::Close(cf) => {
-                    client.writer.send(Message::Close(cf)).await.ok();
+                    client.writer.send(Message::Close(cf)).await?;
                     Err(anyhow!("connection closed"))
                 }
                 _ => Ok(()),
             },
-            Err(e) => {
-                return Err(anyhow!(e));
-            }
+            Err(e) => Err(anyhow!(e)),
         }
     }
 
@@ -74,7 +52,7 @@ impl ClientState {
 #[async_trait]
 pub trait CommandBehavior {
     async fn send(&self, client: &mut Client) -> Result<()>;
-    async fn received(&self, client: &mut Client, msg: Request) -> Result<()>;
+    async fn received(&self, client: &mut Client, txt: String) -> Result<()>;
 }
 
 static LOGIN_BEHAVIOR: LoginBehavior = LoginBehavior;

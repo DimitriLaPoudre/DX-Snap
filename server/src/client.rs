@@ -32,8 +32,6 @@ impl Client {
 
         let (writer, reader) = stream.split();
 
-        log::error!("test");
-
         Ok(Client {
             writer,
             reader,
