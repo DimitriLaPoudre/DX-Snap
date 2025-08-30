@@ -1,13 +1,12 @@
 use crate::prelude::*;
 use crate::protocol::*;
 
-use anyhow::Ok;
 use bcrypt::{DEFAULT_COST, hash, verify};
 use uuid::Uuid;
 
-#[derive(Deserialize, Serialize)]
-#[serde(tag = "action")]
-pub enum LoginActions {
+#[derive(Deserialize, Serialize, Debug)]
+#[serde(tag = "type")]
+pub enum RequestLogin {
     Create { username: String, password: String },
     Connect { username: String, password: String },
     Token { token: Uuid },
@@ -21,18 +20,25 @@ impl CommandBehavior for LoginBehavior {
         Ok(())
     }
 
-    async fn received(&self, client: &mut Client, msg: Request) -> Result<()> {
-        if let RequestTypes::Login(action) = msg.data {
-            match action {
-                LoginActions::Create { username, password } => {
-                    create_user(client, username, password).await?
-                }
-                LoginActions::Connect { username, password } => {
-                    connect_user(client, username, password).await?
-                }
-                LoginActions::Token { token } => connect_token(client, token).await?,
+    async fn received(&self, client: &mut Client, txt: String) -> Result<()> {
+        let msg: RequestLogin = match serde_json::from_str(&txt.to_string()) {
+            Ok(msg) => {
+                log::debug!("[LOGIN] request received: {:?}", msg);
+                msg
             }
-        } else {
+            Err(e) => {
+                log::error!("[LOGIN] serde_json(): {}", e);
+                return Ok(());
+            }
+        };
+        match msg {
+            RequestLogin::Create { username, password } => {
+                create_user(client, username, password).await?
+            }
+            RequestLogin::Connect { username, password } => {
+                connect_user(client, username, password).await?
+            }
+            RequestLogin::Token { token } => connect_token(client, token).await?,
         }
 
         Ok(())
@@ -43,7 +49,7 @@ async fn create_user(client: &mut Client, username: String, password: String) ->
     log::trace!("[LOGIN.CREATE] start");
 
     let password_hash = match hash(password, DEFAULT_COST) {
-        std::result::Result::Ok(hash) => {
+        Ok(hash) => {
             log::debug!("[LOGIN.CREATE] password hashed: {}", hash);
             hash
         }
@@ -62,7 +68,7 @@ async fn create_user(client: &mut Client, username: String, password: String) ->
     .fetch_one(&*client.sql_pool)
     .await
     {
-        std::result::Result::Ok(id) => {
+        Ok(id) => {
             log::debug!("[LOGIN.CREATE] user created: {}", id);
             id
         }
@@ -86,7 +92,7 @@ async fn create_user(client: &mut Client, username: String, password: String) ->
         client.id
     ).fetch_one(&*client.sql_pool)
     .await {
-        std::result::Result::Ok(token) => {
+        Ok(token) => {
             log::debug!("[LOGIN.CREATE] token generated: {}", token);
             // send a reply with the code login and token generated
         }
@@ -110,7 +116,7 @@ async fn connect_user(client: &mut Client, username: String, password: String) -
     .fetch_one(&*client.sql_pool)
     .await
     {
-        std::result::Result::Ok(value) => {
+        Ok(value) => {
             log::debug!("[LOGIN.CONNECT] username valid");
             value
         }
@@ -127,10 +133,10 @@ async fn connect_user(client: &mut Client, username: String, password: String) -
     };
 
     match verify(password, &row.password_hash) {
-        std::result::Result::Ok(true) => {
+        Ok(true) => {
             log::debug!("[LOGIN.CONNECT] password valid");
         }
-        std::result::Result::Ok(false) => {
+        Ok(false) => {
             log::debug!("[LOGIN.CONNECT] password invalid");
             // send a reply with the code password invalid
             return Ok(());
@@ -150,7 +156,7 @@ async fn connect_user(client: &mut Client, username: String, password: String) -
         client.id
     ).fetch_one(&*client.sql_pool)
     .await {
-        std::result::Result::Ok(token) => {
+        Ok(token) => {
             log::debug!("[LOGIN.CONNECT] token generated: {}", token);
             // send a reply with the code login and token generated
         }
@@ -174,7 +180,7 @@ async fn connect_token(client: &mut Client, token: Uuid) -> Result<()> {
     .fetch_one(&*client.sql_pool)
     .await
     {
-        std::result::Result::Ok(id) => {
+        Ok(id) => {
             log::debug!("[LOGIN.TOKEN] token valid");
             // send a reply with the code login with token
             id
