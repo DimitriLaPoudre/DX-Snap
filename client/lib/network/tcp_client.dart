@@ -1,51 +1,40 @@
 import 'dart:io';
 import 'dart:convert';
 
+import 'package:web_socket_channel/web_socket_channel.dart';
+
 import '../tools.dart';
 
 class TcpClient {
-  Socket? _socket;
-
-  
+  WebSocketChannel? _socket;
 
   Future<void> connect(String host, int port) async {
-    _socket = await Socket.connect(host, port);
-    debugPrint("Connected to $host:$port");
+    debugLogs("before connection");
+    _socket = WebSocketChannel.connect(Uri.parse("ws://$host:$port"));
+    debugLogs("Connected to $host:$port");
 
-    _socket!.listen((data) {
-      final message = utf8.decode(data);
-      debugPrint("Received from server: $message");
+    _socket?.stream.listen((data) {
+      final message = data;
+      debugLogs("Received from server: $message");
     }, onError: (err) {
-      debugPrint("Socket error: $err");
-      _socket?.destroy();
+      debugLogs("Socket error: $err");
+      //_socket?.sink.close();
     }, onDone: () {
-      debugPrint("Connection closed by server");
-      _socket?.destroy();
+      debugLogs("Connection closed by server");
+      //_socket?.sink.close();
     });
   }
 
-  void send(String message) {
+  Future<void> sendJsonAuth(String type, String username, String password) async {
     if (_socket != null) {
-      _socket!.write(message);
-      debugPrint("Sent: $message");
-    } else {
-      debugPrint("Error sending message");
-    }
-  }
-
-  void sendJson(Map<String, dynamic> json) {
-    if (_socket != null) {
-      final message = jsonEncode(json);
-      _socket!.writeln(message);
-      debugPrint("Sent JSON: $message");
-    } else {
-      debugPrint("Error sending JSON");
+      final data = jsonEncode({"type":type, "username":username, "password":password});
+      _socket!.sink.add(data);
     }
   }
 
   void close() {
-    _socket?.close();
+    _socket?.sink.close();
     _socket = null;
-    debugPrint("Connection closed");
+    debugLogs("Connection closed");
   }
 }

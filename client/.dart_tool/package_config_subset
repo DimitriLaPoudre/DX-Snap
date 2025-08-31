@@ -18,6 +18,10 @@ collection
 3.4
 file:///C:/Users/frenc/AppData/Local/Pub/Cache/hosted/pub.dev/collection-1.19.1/
 file:///C:/Users/frenc/AppData/Local/Pub/Cache/hosted/pub.dev/collection-1.19.1/lib/
+crypto
+3.4
+file:///C:/Users/frenc/AppData/Local/Pub/Cache/hosted/pub.dev/crypto-3.0.6/
+file:///C:/Users/frenc/AppData/Local/Pub/Cache/hosted/pub.dev/crypto-3.0.6/lib/
 cupertino_icons
 3.1
 file:///C:/Users/frenc/AppData/Local/Pub/Cache/hosted/pub.dev/cupertino_icons-1.0.8/
@@ -86,6 +90,10 @@ test_api
 3.5
 file:///C:/Users/frenc/AppData/Local/Pub/Cache/hosted/pub.dev/test_api-0.7.4/
 file:///C:/Users/frenc/AppData/Local/Pub/Cache/hosted/pub.dev/test_api-0.7.4/lib/
+typed_data
+3.5
+file:///C:/Users/frenc/AppData/Local/Pub/Cache/hosted/pub.dev/typed_data-1.4.0/
+file:///C:/Users/frenc/AppData/Local/Pub/Cache/hosted/pub.dev/typed_data-1.4.0/lib/
 vector_math
 2.14
 file:///C:/Users/frenc/AppData/Local/Pub/Cache/hosted/pub.dev/vector_math-2.1.4/
@@ -94,6 +102,14 @@ vm_service
 3.3
 file:///C:/Users/frenc/AppData/Local/Pub/Cache/hosted/pub.dev/vm_service-15.0.0/
 file:///C:/Users/frenc/AppData/Local/Pub/Cache/hosted/pub.dev/vm_service-15.0.0/lib/
+web
+3.3
+file:///C:/Users/frenc/AppData/Local/Pub/Cache/hosted/pub.dev/web-0.5.1/
+file:///C:/Users/frenc/AppData/Local/Pub/Cache/hosted/pub.dev/web-0.5.1/lib/
+web_socket_channel
+3.3
+file:///C:/Users/frenc/AppData/Local/Pub/Cache/hosted/pub.dev/web_socket_channel-2.4.5/
+file:///C:/Users/frenc/AppData/Local/Pub/Cache/hosted/pub.dev/web_socket_channel-2.4.5/lib/
 client
 3.8
 file:///C:/Users/frenc/Desktop/DX-Snap/client/
