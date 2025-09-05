@@ -17,7 +17,7 @@ use std::net::SocketAddr;
 use tokio::net::{TcpListener, TcpStream};
 use tokio::signal;
 // use tokio::sync::mpsc::{self, Receiver, Sender};
-use tokio::sync::{Notify, RwLock};
+use tokio::sync::Notify;
 use tokio::task::JoinSet;
 
 fn setup_logger() -> Result<()> {
@@ -147,14 +147,14 @@ async fn main() {
             ret = server.listener.accept() => {
                 match ret {
                     Ok(value) => server.handle_connexion(value).await,
-                    Err(e) => log::error!("accept(): {}", e),
+                    Err(e) => log::error!("accept(): {e}"),
                 }
             }
             ret = server.join_set.join_next() => {
                  match ret {
                     Some(Ok(Ok(()))) => {}
-                    Some(Ok(Err(e))) => log::error!("join_next(): {}", e),
-                    Some(Err(e)) => log::error!("join_next(): {}", e),
+                    Some(Ok(Err(e))) => log::error!("join_next(): {e}"),
+                    Some(Err(e)) => log::error!("join_next(): {e}"),
                     None => {
                         log::info!("No more task, will quit safely.");
                         break;

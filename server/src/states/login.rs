@@ -23,11 +23,11 @@ impl CommandBehavior for LoginBehavior {
     async fn received(&self, client: &mut Client, txt: String) -> Result<()> {
         let msg: RequestLogin = match serde_json::from_str(&txt.to_string()) {
             Ok(msg) => {
-                log::debug!("[LOGIN] request received: {:?}", msg);
+                log::debug!("[LOGIN] request received: {msg:?}");
                 msg
             }
             Err(e) => {
-                log::error!("[LOGIN] serde_json(): {}", e);
+                log::error!("[LOGIN] serde_json(): {e}");
                 return Ok(());
             }
         };
@@ -50,11 +50,11 @@ async fn create_user(client: &mut Client, username: String, password: String) ->
 
     let password_hash = match hash(password, DEFAULT_COST) {
         Ok(hash) => {
-            log::debug!("[LOGIN.CREATE] password hashed: {}", hash);
+            log::debug!("[LOGIN.CREATE] password hashed: {hash}");
             hash
         }
         Err(e) => {
-            log::error!("[LOGIN.CREATE] hash(): {}", e);
+            log::error!("[LOGIN.CREATE] hash(): {e}");
             // send a reply with the code hash error
             return Ok(());
         }
@@ -69,7 +69,7 @@ async fn create_user(client: &mut Client, username: String, password: String) ->
     .await
     {
         Ok(id) => {
-            log::debug!("[LOGIN.CREATE] user created: {}", id);
+            log::debug!("[LOGIN.CREATE] user created: {id}");
             id
         }
         Err(sqlx::Error::Database(db_err)) if db_err.is_unique_violation() => {
@@ -78,7 +78,7 @@ async fn create_user(client: &mut Client, username: String, password: String) ->
             return Ok(());
         }
         Err(e) => {
-            log::error!("[LOGIN.CONNECT] DatabaseError(): {}", e);
+            log::error!("[LOGIN.CONNECT] DatabaseError(): {e}");
             // send a reply with the code database error
             return Ok(());
         }
@@ -93,11 +93,11 @@ async fn create_user(client: &mut Client, username: String, password: String) ->
     ).fetch_one(&*client.sql_pool)
     .await {
         Ok(token) => {
-            log::debug!("[LOGIN.CREATE] token generated: {}", token);
+            log::debug!("[LOGIN.CREATE] token generated: {token}");
             // send a reply with the code login and token generated
         }
         Err(e) => {
-            log::error!("[LOGIN.CONNECT] DatabaseError(): {}", e);
+            log::error!("[LOGIN.CONNECT] DatabaseError(): {e}");
             // send a reply with the code login but token error
         }
     };
@@ -126,7 +126,7 @@ async fn connect_user(client: &mut Client, username: String, password: String) -
             return Ok(());
         }
         Err(e) => {
-            log::error!("[LOGIN.CONNECT] DatabaseError(): {}", e);
+            log::error!("[LOGIN.CONNECT] DatabaseError(): {e}");
             // send a reply with the code database error
             return Ok(());
         }
@@ -142,7 +142,7 @@ async fn connect_user(client: &mut Client, username: String, password: String) -
             return Ok(());
         }
         Err(e) => {
-            log::error!("[LOGIN.CONNECT] verify(): {}", e);
+            log::error!("[LOGIN.CONNECT] verify(): {e}");
             // send a reply with the code hash error
             return Ok(());
         }
@@ -157,11 +157,11 @@ async fn connect_user(client: &mut Client, username: String, password: String) -
     ).fetch_one(&*client.sql_pool)
     .await {
         Ok(token) => {
-            log::debug!("[LOGIN.CONNECT] token generated: {}", token);
+            log::debug!("[LOGIN.CONNECT] token generated: {token}");
             // send a reply with the code login and token generated
         }
         Err(e) => {
-            log::error!("[LOGIN.CONNECT] DatabaseError(): {}", e);
+            log::error!("[LOGIN.CONNECT] DatabaseError(): {e}");
             // send a reply with the code login but token error
         }
     };
@@ -191,7 +191,7 @@ async fn connect_token(client: &mut Client, token: Uuid) -> Result<()> {
             return Ok(());
         }
         Err(e) => {
-            log::error!("[LOGIN.TOKEN] DatabaseError: {}", e);
+            log::error!("[LOGIN.TOKEN] DatabaseError: {e}");
             // send a reply with the code database error
             return Ok(());
         }

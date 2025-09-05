@@ -21,11 +21,11 @@ impl CommandBehavior for HomepageBehavior {
     async fn received(&self, client: &mut Client, txt: String) -> Result<()> {
         let msg: RequestHomepage = match serde_json::from_str(&txt.to_string()) {
             Ok(msg) => {
-                log::debug!("[HOMEPAGE] request received: {:?}", msg);
+                log::debug!("[HOMEPAGE] request received: {msg:?}");
                 msg
             }
             Err(e) => {
-                log::error!("[HOMEPAGE] serde_json(): {}", e);
+                log::error!("[HOMEPAGE] serde_json(): {e}");
                 return Ok(());
             }
         };
